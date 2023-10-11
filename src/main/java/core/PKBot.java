@@ -1,11 +1,34 @@
 package core;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
+
+import core.events.EventListener;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.sharding.ShardManager;
+
 
 public class PKBot {
-    public static void main(String[] arguments) throws Exception {
-        JDA api = JDABuilder.createDefault("token").build();
+
+    private final ShardManager shardManager;
+
+    public PKBot() {
+        String token = "MTE2MTcwODA3OTczMDEzMTAxNQ.GCK5af.3i3zV7uXvktg5G0AaIKpB7dHNav01mmLvp0mZw";
+        DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token);
+        builder.setStatus(OnlineStatus.ONLINE);
+        builder.setActivity(Activity.playing("with your Mum"));
+        builder.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS);
+
+        shardManager = builder.build();
+
+        shardManager.addEventListener(new EventListener());
+    }
+
+    public ShardManager getShardManager() {
+        return shardManager;
+    }
+
+    public static void main(String[] args){
+            PKBot bot = new PKBot();
     }
 }
-
-// this is a test
