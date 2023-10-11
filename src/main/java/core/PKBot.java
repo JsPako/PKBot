@@ -7,5 +7,3 @@ public class PKBot {
         JDA api = JDABuilder.createDefault("token").build();
     }
 }
-
-// this is a test
