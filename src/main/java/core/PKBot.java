@@ -1,7 +1,6 @@
 package core;
 
 import core.commands.CommandListener;
-import core.events.EventListener;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -22,7 +21,7 @@ public class PKBot {
 
         shardManager = builder.build();
 
-        shardManager.addEventListener(new EventListener(),new CommandListener());
+        shardManager.addEventListener(new CommandListener());
     }
 
     public ShardManager getShardManager() {
