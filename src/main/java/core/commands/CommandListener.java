@@ -64,7 +64,7 @@ public class CommandListener extends ListenerAdapter {
         }
     }
 
-
+    // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
     @Override
     public void onGuildReady(GuildReadyEvent event) {
         List<CommandData> commandData = new ArrayList<>();
@@ -75,6 +75,7 @@ public class CommandListener extends ListenerAdapter {
     }
 
 
+    // Global Commands - use for production commands can take up to 1 hour to become available.
     @Override
     public void onReady(ReadyEvent event) {
         List<CommandData> commandData = new ArrayList<>();
