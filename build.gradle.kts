@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion")
+    implementation("org.xerial:sqlite-jdbc:3.43.0.0")
 }
 
 tasks.withType<JavaCompile> {

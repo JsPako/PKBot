@@ -1,6 +1,7 @@
 package core;
 
 import core.commands.CommandListener;
+import core.database.buildTable;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -28,7 +29,9 @@ public class PKBot {
         return shardManager;
     }
 
-    public static void main(String[] args){
-            PKBot bot = new PKBot();
+    public static void main(String[] args) {
+        buildTable.build();
+
+        PKBot bot = new PKBot();
     }
 }
