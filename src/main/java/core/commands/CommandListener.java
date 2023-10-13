@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class CommandListener extends ListenerAdapter {
 
@@ -32,10 +31,7 @@ public class CommandListener extends ListenerAdapter {
                 break;
             case "gamble":
                 // generate random
-                Random rnd = new Random();
-
-                // generation 50/50 chance - TODO not working
-                int gamblechance = rnd.nextInt(1, 2);
+                double gamblechance = Math.random();
 
                 //print to terminal the chance
                 System.out.println(gamblechance);
@@ -44,21 +40,23 @@ public class CommandListener extends ListenerAdapter {
                 OptionMapping messageOption = event.getOption("amount");
                 int gambleamount = messageOption.getAsInt();
 
-                if(gamblechance == 1)
+                if(gamblechance > 0.44)
                 {
-                    //win
-                    //double or nothing - TODO fix gamblechance, does not work atm
+                    //win - double
                     gambleamount = gambleamount*2;
                     event.reply("Congratulations, you won " +Integer.toString(gambleamount)).queue();
-                    gamblechance = rnd.nextInt(1,2);
                 }
-                if(gamblechance == 2)
+                else if(gamblechance < 0.44)
                 {
-
-                    //fail
+                    //fail - lose all
                     gambleamount = 0;
                     event.reply("You lost").queue();
-                    gamblechance = rnd.nextInt(1,2);
+                }
+                else if(gamblechance > 0.95)
+                {
+                    //extremely lucky win
+                    gambleamount = gambleamount*14;
+                    event.reply("Congratulations, you won the jackpot " +Integer.toString(gambleamount)).queue();
                 }
                 break;
         }
