@@ -1,6 +1,7 @@
 package core.commands;
 
 import core.commands.balance.getBalance;
+import core.commands.balance.pay;
 import core.utility.insertUser;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListResourceBundle;
 
 public class CommandListener extends ListenerAdapter {
 
@@ -32,7 +34,17 @@ public class CommandListener extends ListenerAdapter {
                 event.reply("Your balance is: " + balance + " shekels.").queue();
                 break;
             case "pay":
-                event.reply("You paid shekels").queue();
+                OptionMapping userOption = event.getOption("user");
+                OptionMapping amountOption = event.getOption("amount");
+
+                assert userOption != null;
+                String payUserID = userOption.getAsUser().getId();
+                assert amountOption != null;
+                Integer payAmount = amountOption.getAsInt();
+
+                pay.user(user, payUserID, payAmount);
+
+                event.reply("You paid <@" + userOption.getAsUser().getId() + "> " + payAmount + " shekels.").queue();
                 break;
             case "daily":
                 event.reply("Daily Redeemed!").queue();
@@ -117,6 +129,8 @@ public class CommandListener extends ListenerAdapter {
         // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
         List<CommandData> commandData = new ArrayList<>();
         commandData.add(Commands.slash("daily","Get your daily payday!"));
+
+
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
 
@@ -126,10 +140,12 @@ public class CommandListener extends ListenerAdapter {
         List<CommandData> commandData = new ArrayList<>();
         commandData.add(Commands.slash("ping","Check if the bot is responsive."));
         commandData.add(Commands.slash("bal","Displays your balance."));
-        commandData.add(Commands.slash("pay","Pay someone"));
+        OptionData payOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person you want to pay", true);
+        OptionData payOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount to transfer.", true);
+        commandData.add(Commands.slash("pay", "Pay an amount of money to a user.").addOptions(payOption1,payOption2));
         //coinflip info - option 1 is the int input
-        OptionData option1 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount youd like to gamble for double or nothing.", true);
-        commandData.add(Commands.slash("coinflip","enter in the amount you want to gamble for a chance to double or nothing").addOptions(option1));
+        OptionData coinOption1 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount youd like to gamble for double or nothing.", true);
+        commandData.add(Commands.slash("coinflip","enter in the amount you want to gamble for a chance to double or nothing").addOptions(coinOption1));
         event.getJDA().updateCommands().addCommands(commandData).queue();
     }
 }
