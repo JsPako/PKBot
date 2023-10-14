@@ -14,13 +14,10 @@ public class getBalance {
         // Try to look up the user_id in database
         try {
             ResultSet rs = getTable.query(con, USER_ID);
-            // Close the connection to the database
             // Return the user's balance or 0 if not found in the database.
-            getTable.closeConnection(con);
             return rs != null ? rs.getInt("balance") : 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
