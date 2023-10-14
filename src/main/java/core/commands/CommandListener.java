@@ -95,9 +95,7 @@ public class CommandListener extends ListenerAdapter {
                 break;
 
                 /* MISSING COMMANDS 
-                 * 
-                 *  Balance - incomplete
-                 *  Pay - incomplete
+                 *
                  *  Daily - gives user their daily amount of money
                  *  
                  *  admin commands potentially
