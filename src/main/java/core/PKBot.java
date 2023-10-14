@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 public class PKBot {
 
@@ -18,6 +20,8 @@ public class PKBot {
         builder.setStatus(OnlineStatus.ONLINE);
         builder.setActivity(Activity.playing("with your Mum"));
         builder.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS);
+        builder.setMemberCachePolicy(MemberCachePolicy.ALL);
+        builder.setChunkingFilter(ChunkingFilter.ALL);
 
         shardManager = builder.build();
 

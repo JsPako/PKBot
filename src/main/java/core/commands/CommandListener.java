@@ -1,5 +1,8 @@
 package core.commands;
 
+import core.commands.balance.getBalance;
+import core.utility.insertUser;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -9,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +21,15 @@ public class CommandListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        String user = event.getUser().getId();
         String command = event.getName();
-
         switch (command.toLowerCase()){
             case "ping":
                 event.reply("Pong!").queue();
                 break;
             case "bal":
-                event.reply("Your balance is 1,000,000 bananas.").queue();
+                int balance = getBalance.fromUser(user);
+                event.reply("Your balance is: " + balance + " shekels.").queue();
                 break;
             case "pay":
                 event.reply("You paid shekels").queue();
@@ -88,7 +93,10 @@ public class CommandListener extends ListenerAdapter {
 
     // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
     @Override
-    public void onGuildReady(GuildReadyEvent event) {
+    public void onGuildReady(@NotNull GuildReadyEvent event) {
+
+        insertUser.onReady(event);
+
         List<CommandData> commandData = new ArrayList<>();
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }

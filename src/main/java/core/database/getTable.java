@@ -11,21 +11,28 @@ public class getTable {
         ResultSet rs = stmt.executeQuery(querySQL);
 
         if (rs.next()) {
+            // Returns the ResultSet (aka the row) with the matching user_id.
             return rs;
         } else {
+            // If no matching user_id can be found, print an error and return null.
             System.out.println("ID is not existent.");
             return null;
         }
     }
 
     public static void insert(Connection con, String USER_ID) throws SQLException {
+        // Insert a new user into the Database with predetermined default values.
         String insertSQL = "INSERT OR IGNORE INTO Users(user_id, balance, net_gain, total_loss, total_win) VALUES(?, 500, 0, 0, 0)";
         PreparedStatement prepared = con.prepareStatement(insertSQL);
+        // Set the '?' value to be the passed USER_ID.
         prepared.setString(1, USER_ID);
         prepared.executeUpdate();
     }
 
     public static void update(Connection con, String USER_ID, Integer AMOUNT, Boolean RESULT) throws SQLException{
+        // AMOUNT is the POSITIVE number that needs to be updated in the database.
+        // RESULT is a function switch takes the AMOUNT and either adds or removes from balance and statistics,
+            // TRUE for WON, FALSE for LOSS.
         int balance, net_gain, total_loss, total_win;
         try {
             ResultSet rs = query(con, USER_ID);
@@ -50,6 +57,7 @@ public class getTable {
         String updateSQL = String.format("UPDATE Users SET balance = %d, net_gain = %d, total_loss = %d, total_win = %d WHERE user_id = '%s'",
                                         balance, net_gain, total_loss, total_win, USER_ID);
         Statement stmt = con.createStatement();
+        //noinspection SqlSourceToSinkFlow
         stmt.executeUpdate(updateSQL);
     }
 
