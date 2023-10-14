@@ -4,6 +4,7 @@ import core.commands.balance.getBalance;
 import core.utility.insertUser;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -91,16 +92,21 @@ public class CommandListener extends ListenerAdapter {
         }
     }
 
-    // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
+    // Whenever a user joins a discord server, inserts it to the database.
+    @Override
+    public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
+        insertUser.onMemberJoin(event);
+    }
+
+    // Loops through the all the users in the discord server and inserts (if able) to the database.
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
-
         insertUser.onReady(event);
 
+        // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
         List<CommandData> commandData = new ArrayList<>();
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
-
 
     // Global Commands - use for production commands can take up to 1 hour to become available.
     @Override

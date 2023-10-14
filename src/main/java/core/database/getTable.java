@@ -35,15 +35,19 @@ public class getTable {
             // TRUE for WON, FALSE for LOSS.
         int balance, net_gain, total_loss, total_win;
         try {
+            // Query the database for the user's row
             ResultSet rs = query(con, USER_ID);
 
+            // Make the assumption that the user's row is not null
             assert rs != null;
             if(RESULT){
+                // Set the new variables when the user won.
                 balance = rs.getInt("balance") + AMOUNT;
                 net_gain = rs.getInt("net_gain") + AMOUNT;
                 total_loss = rs.getInt("total_loss");
                 total_win = rs.getInt("total_win") + AMOUNT;
             } else {
+                // Set the new variables when the user lost.
                 balance = rs.getInt("balance") - AMOUNT;
                 net_gain = rs.getInt("net_gain") - AMOUNT;
                 total_loss = rs.getInt("total_loss") + AMOUNT;
@@ -54,6 +58,7 @@ public class getTable {
             throw new RuntimeException(e);
         }
 
+        // Update the user's database row with the newly calculated values.
         String updateSQL = String.format("UPDATE Users SET balance = %d, net_gain = %d, total_loss = %d, total_win = %d WHERE user_id = '%s'",
                                         balance, net_gain, total_loss, total_win, USER_ID);
         Statement stmt = con.createStatement();
