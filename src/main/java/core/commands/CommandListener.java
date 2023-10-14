@@ -2,7 +2,6 @@ package core.commands;
 
 import core.commands.balance.getBalance;
 import core.utility.insertUser;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -35,6 +34,9 @@ public class CommandListener extends ListenerAdapter {
             case "pay":
                 event.reply("You paid shekels").queue();
                 break;
+            case "daily":
+                event.reply("Daily Redeemed!").queue();
+                break;
             case "coinflip":
                 // generate random
                 double gamblechance = Math.random();
@@ -50,25 +52,34 @@ public class CommandListener extends ListenerAdapter {
                 OptionMapping messageOption = event.getOption("amount");
                 int gambleamount = messageOption.getAsInt();
                 
+                //pull balance from db
+                int gamblebalance = getBalance.fromUser(user);
 
-                if(gamblechance > percentchance)
+                if(gambleamount > gamblebalance)
                 {
+                    event.reply("Not enough balance to make this action.").queue();
+                }
+                else
+                {
+                    if(gamblechance > percentchance)
+                    {
                     //win - double
                     gambleamount = gambleamount*2;
                     event.reply("Congratulations, you won " +Integer.toString(gambleamount)).queue();
-                }
-                else if(gamblechance < percentchance)
-                {
+                    }
+                    else if(gamblechance < percentchance)
+                    {
                     //fail - lose all
                     gambleamount = 0;
                     event.reply("You lost").queue();
-                }
-                else if(gamblechance > jackpotchance)
-                {
+                    }
+                    else if(gamblechance > jackpotchance)
+                    {
                     //extremely lucky win - multiply by 14
                     gambleamount = gambleamount*14;
                     event.reply("Congratulations, you won the jackpot " +Integer.toString(gambleamount)).queue();
-                }
+                    }
+                }   
                 break;
 
                 /* MISSING COMMANDS 
@@ -105,6 +116,7 @@ public class CommandListener extends ListenerAdapter {
 
         // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
         List<CommandData> commandData = new ArrayList<>();
+        commandData.add(Commands.slash("daily","Get your daily payday!"));
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
 
