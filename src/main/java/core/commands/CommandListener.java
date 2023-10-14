@@ -2,6 +2,7 @@ package core.commands;
 
 import core.commands.balance.getBalance;
 import core.commands.balance.pay;
+import core.database.getTable;
 import core.utility.insertUser;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
@@ -15,9 +16,10 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListResourceBundle;
+import java.sql.SQLException;
 
 public class CommandListener extends ListenerAdapter {
 
@@ -39,6 +41,7 @@ public class CommandListener extends ListenerAdapter {
 
                 assert userOption != null;
                 String payUserID = userOption.getAsUser().getId();
+
                 assert amountOption != null;
                 Integer payAmount = amountOption.getAsInt();
 
@@ -63,7 +66,7 @@ public class CommandListener extends ListenerAdapter {
                 //pull option from message and convert it to int
                 OptionMapping messageOption = event.getOption("amount");
                 int gambleamount = messageOption.getAsInt();
-                
+
                 //pull balance from db
                 int gamblebalance = getBalance.fromUser(user);
 
@@ -77,19 +80,49 @@ public class CommandListener extends ListenerAdapter {
                     {
                     //win - double
                     gambleamount = gambleamount*2;
-                    event.reply("Congratulations, you won " +Integer.toString(gambleamount)).queue();
+                    Connection con = getTable.openConnection();
+                    try {
+                        getTable.update(con, user, gambleamount, true);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    int truebal = getBalance.fromUser(user);
+                    getTable.closeConnection(con);
+                    event.reply("Congratulations, you won " +Integer.toString(gambleamount)+ " and you now have "+Integer.toString(truebal) + " pisscoins").queue();
+
                     }
                     else if(gamblechance < percentchance)
                     {
+
                     //fail - lose all
-                    gambleamount = 0;
-                    event.reply("You lost").queue();
+                    gambleamount = gambleamount;
+                    Connection con = getTable.openConnection();
+                    try 
+                    {
+                        getTable.update(con, user, gambleamount, false);
+                    } 
+                    catch (SQLException e) 
+                    {
+                        throw new RuntimeException(e);
+                    }
+                    int truebal = getBalance.fromUser(user);
+                    getTable.closeConnection(con);
+                    event.reply("You lost and you now have "+Integer.toString(truebal) + " pisscoins").queue();
+
                     }
                     else if(gamblechance > jackpotchance)
                     {
                     //extremely lucky win - multiply by 14
                     gambleamount = gambleamount*14;
-                    event.reply("Congratulations, you won the jackpot " +Integer.toString(gambleamount)).queue();
+                    Connection con = getTable.openConnection();
+                    try {
+                        getTable.update(con, user, gambleamount, true);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    int truebal = getBalance.fromUser(user);
+                    getTable.closeConnection(con);
+                    event.reply("Congratulations, you won the jackpot " +Integer.toString(gambleamount)+ " and you now have "+Integer.toString(truebal) + " pisscoins").queue();
                     }
                 }   
                 break;
@@ -102,7 +135,8 @@ public class CommandListener extends ListenerAdapter {
                  * 
                  *  givemoney - gives money to user
                  *  setmoney - sets users cash
-                 *  
+                 *  resetmoney - reset users cash
+                 * 
                  *  !!FUN!! commands potentially
                  * 
                  *  nuke - costs 90 percent of money in the entire server and restarts everyone back to default amount of cash
