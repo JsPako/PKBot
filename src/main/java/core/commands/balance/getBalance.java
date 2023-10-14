@@ -15,7 +15,10 @@ public class getBalance {
         try {
             ResultSet rs = getTable.query(con, USER_ID);
             // Return the user's balance or 0 if not found in the database.
-            return rs != null ? rs.getInt("balance") : 0;
+            // Save the user's balance as a local variable to be able to close the connection to the database.
+            int balance = rs != null ? rs.getInt("balance") : 0;
+            getTable.closeConnection(con);
+            return balance;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
