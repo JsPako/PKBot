@@ -29,7 +29,7 @@ public class getTable {
         prepared.executeUpdate();
     }
 
-    public static void update(Connection con, String USER_ID, Integer AMOUNT, Boolean RESULT) throws SQLException{
+    public static void updateGamble(Connection con, String USER_ID, Integer AMOUNT, Boolean RESULT) throws SQLException{
         // AMOUNT is the POSITIVE number that needs to be updated in the database.
         // RESULT is a function switch takes the AMOUNT and either adds or removes from balance and statistics,
             // TRUE for WON, FALSE for LOSS.
@@ -61,6 +61,39 @@ public class getTable {
         // Update the user's database row with the newly calculated values.
         String updateSQL = String.format("UPDATE Users SET balance = %d, net_gain = %d, total_loss = %d, total_win = %d WHERE user_id = '%s'",
                                         balance, net_gain, total_loss, total_win, USER_ID);
+        Statement stmt = con.createStatement();
+        //noinspection SqlSourceToSinkFlow
+        stmt.executeUpdate(updateSQL);
+    }
+
+    public static void updateBalance(Connection con, String USER_ID, Integer AMOUNT, Boolean CHOICE) throws SQLException{
+        // AMOUNT is the POSITIVE number that needs to be updated in the database.
+        // RESULT is a function switch takes the AMOUNT and either adds or removes from balance and statistics,
+        // TRUE for ADD, FALSE for REMOVE.
+        int balance, net_gain;
+        try {
+            // Query the database for the user's row
+            ResultSet rs = query(con, USER_ID);
+
+            // Make the assumption that the user's row is not null
+            assert rs != null;
+            if(CHOICE){
+                // ADD the new variables from the user.
+                balance = rs.getInt("balance") + AMOUNT;
+                net_gain = rs.getInt("net_gain") + AMOUNT;
+            } else {
+                // REMOVE the new variables from the user.
+                balance = rs.getInt("balance") - AMOUNT;
+                net_gain = rs.getInt("net_gain") - AMOUNT;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Update the user's database row with the newly calculated values.
+        String updateSQL = String.format("UPDATE Users SET balance = %d, net_gain = %d WHERE user_id = '%s'",
+                balance, net_gain, USER_ID);
         Statement stmt = con.createStatement();
         //noinspection SqlSourceToSinkFlow
         stmt.executeUpdate(updateSQL);

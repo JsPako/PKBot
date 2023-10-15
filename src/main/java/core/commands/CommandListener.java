@@ -2,7 +2,7 @@ package core.commands;
 
 import core.commands.balance.getBalance;
 import core.commands.balance.pay;
-import core.database.getTable;
+import core.commands.gamble.coinFlip;
 import core.utility.insertUser;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
@@ -16,10 +16,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.SQLException;
 
 public class CommandListener extends ListenerAdapter {
 
@@ -33,98 +31,21 @@ public class CommandListener extends ListenerAdapter {
                 break;
             case "bal":
                 int balance = getBalance.fromUser(user);
-                event.reply("Your balance is: " + balance + " shekels.").queue();
+                event.reply("Your balance is: " + balance + " pisscoins").queue();
                 break;
             case "pay":
                 OptionMapping userOption = event.getOption("user");
                 OptionMapping amountOption = event.getOption("amount");
 
-                assert userOption != null;
-                String payUserID = userOption.getAsUser().getId();
-
-                assert amountOption != null;
-                Integer payAmount = amountOption.getAsInt();
-
-                pay.user(user, payUserID, payAmount);
-
-                event.reply("You paid <@" + userOption.getAsUser().getId() + "> " + payAmount + " shekels.").queue();
+                pay.user(event, user);
+                event.reply("You paid <@" + (userOption != null ? userOption.getAsUser().getId() : null) + "> "
+                            + (amountOption != null ? amountOption.getAsInt() : 0) + " pisscoins").queue();
                 break;
             case "daily":
                 event.reply("Daily Redeemed!").queue();
                 break;
             case "coinflip":
-                // generate random
-                double gamblechance = Math.random();
-
-                // gambling chance - 56 percent edge to the house, 44 to the player, 5 percent chance of jackpot
-                double percentchance = 0.56;
-                double jackpotchance = 0.95;
-
-                //print to terminal the chance
-                System.out.println(gamblechance);
-
-                //pull option from message and convert it to int
-                OptionMapping messageOption = event.getOption("amount");
-                int gambleamount = messageOption.getAsInt();
-
-                //pull balance from db
-                int gamblebalance = getBalance.fromUser(user);
-
-                if(gambleamount > gamblebalance)
-                {
-                    event.reply("Not enough balance to make this action.").queue();
-                }
-                else
-                {
-                    if(gamblechance > percentchance)
-                    {
-                    //win - double
-                    gambleamount = gambleamount*2;
-                    Connection con = getTable.openConnection();
-                    try {
-                        getTable.update(con, user, gambleamount, true);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                    int truebal = getBalance.fromUser(user);
-                    getTable.closeConnection(con);
-                    event.reply("Congratulations, you won " +Integer.toString(gambleamount)+ " and you now have "+Integer.toString(truebal) + " pisscoins").queue();
-
-                    }
-                    else if(gamblechance < percentchance)
-                    {
-
-                    //fail - lose all
-                    gambleamount = gambleamount;
-                    Connection con = getTable.openConnection();
-                    try 
-                    {
-                        getTable.update(con, user, gambleamount, false);
-                    } 
-                    catch (SQLException e) 
-                    {
-                        throw new RuntimeException(e);
-                    }
-                    int truebal = getBalance.fromUser(user);
-                    getTable.closeConnection(con);
-                    event.reply("You lost and you now have "+Integer.toString(truebal) + " pisscoins").queue();
-
-                    }
-                    else if(gamblechance > jackpotchance)
-                    {
-                    //extremely lucky win - multiply by 14
-                    gambleamount = gambleamount*14;
-                    Connection con = getTable.openConnection();
-                    try {
-                        getTable.update(con, user, gambleamount, true);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                    int truebal = getBalance.fromUser(user);
-                    getTable.closeConnection(con);
-                    event.reply("Congratulations, you won the jackpot " +Integer.toString(gambleamount)+ " and you now have "+Integer.toString(truebal) + " pisscoins").queue();
-                    }
-                }   
+                coinFlip.gamble(event, user);
                 break;
 
                 /* MISSING COMMANDS 
@@ -160,9 +81,6 @@ public class CommandListener extends ListenerAdapter {
 
         // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
         List<CommandData> commandData = new ArrayList<>();
-        commandData.add(Commands.slash("daily","Get your daily payday!"));
-
-
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
 
@@ -173,11 +91,11 @@ public class CommandListener extends ListenerAdapter {
         commandData.add(Commands.slash("ping","Check if the bot is responsive."));
         commandData.add(Commands.slash("bal","Displays your balance."));
         OptionData payOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person you want to pay", true);
-        OptionData payOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount to transfer.", true);
+        OptionData payOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount to transfer.", true).setMaxValue(1000000000).setMinValue(1);
         commandData.add(Commands.slash("pay", "Pay an amount of money to a user.").addOptions(payOption1,payOption2));
         //coinflip info - option 1 is the int input
-        OptionData coinOption1 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount youd like to gamble for double or nothing.", true);
-        commandData.add(Commands.slash("coinflip","enter in the amount you want to gamble for a chance to double or nothing").addOptions(coinOption1));
+        OptionData coinOption1 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount you'd like to gamble for double or nothing", true).setMaxValue(1000000000).setMinValue(1);
+        commandData.add(Commands.slash("coinflip","Enter in the amount you want to gamble for a chance to double or nothing").addOptions(coinOption1));
         event.getJDA().updateCommands().addCommands(commandData).queue();
     }
 }

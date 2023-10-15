@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class getBalance {
-    public static int fromUser(String USER_ID){
+    public static int fromUser(String USER_ID) {
         // Connect to the database
         Connection con = getTable.openConnection();
 

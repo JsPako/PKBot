@@ -27,8 +27,8 @@ public class insertUser {
             String user = member.toString();
             // Trim the string to only extract the user_id.
             int index = user.indexOf("id=");
-            String user_id = user.substring(index+3, index + 21);
-
+            String user_id = user.substring(index+3, index + 22);
+            user_id = user_id.replace(",", "");
             // Try to insert extracted user_id.
             try {
                 getTable.insert(con, user_id);
