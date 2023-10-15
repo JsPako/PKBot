@@ -2,13 +2,16 @@ package core.commands;
 
 import core.commands.balance.getBalance;
 import core.commands.balance.pay;
+import core.commands.balance.setBalance;
 import core.commands.gamble.coinFlip;
 import core.utility.insertUser;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -16,6 +19,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +37,25 @@ public class CommandListener extends ListenerAdapter {
                 int balance = getBalance.fromUser(user);
                 event.reply("Your balance is: " + balance + " pisscoins").queue();
                 break;
-            case "pay":
+            case "setbal":
                 OptionMapping userOption = event.getOption("user");
                 OptionMapping amountOption = event.getOption("amount");
 
-                pay.user(event, user);
-                event.reply("You paid <@" + (userOption != null ? userOption.getAsUser().getId() : null) + "> "
+                try {
+                    setBalance.user(event);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                event.reply("You set <@" + (userOption != null ? userOption.getAsUser().getId() : null) + "> to "
                             + (amountOption != null ? amountOption.getAsInt() : 0) + " pisscoins").queue();
+                break;
+            case "pay":
+                OptionMapping userPayOption = event.getOption("user");
+                OptionMapping amountPayOption = event.getOption("amount");
+
+                pay.user(event, user);
+                event.reply("You paid <@" + (userPayOption != null ? userPayOption.getAsUser().getId() : null) + "> "
+                            + (amountPayOption != null ? amountPayOption.getAsInt() : 0) + " pisscoins").queue();
                 break;
             case "daily":
                 event.reply("Daily Redeemed!").queue();
@@ -92,10 +108,12 @@ public class CommandListener extends ListenerAdapter {
         commandData.add(Commands.slash("bal","Displays your balance."));
         OptionData payOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person you want to pay", true);
         OptionData payOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount to transfer.", true).setMaxValue(1000000000).setMinValue(1);
-        commandData.add(Commands.slash("pay", "Pay an amount of money to a user.").addOptions(payOption1,payOption2));
-        //coinflip info - option 1 is the int input
+        commandData.add(Commands.slash("pay", "Pay an amount of money to a user.").addOptions(payOption1,payOption2).setGuildOnly(true));
         OptionData coinOption1 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount you'd like to gamble for double or nothing", true).setMaxValue(1000000000).setMinValue(1);
         commandData.add(Commands.slash("coinflip","Enter in the amount you want to gamble for a chance to double or nothing").addOptions(coinOption1));
+        OptionData setOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person's balance you want to set", true);
+        OptionData setOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount you want to set the balance to", true).setMaxValue(1000000000).setMinValue(0);
+        commandData.add(Commands.slash("setbal","Enter in the amount you want to gamble for a chance to double or nothing").addOptions(setOption1, setOption2).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)).setGuildOnly(true));
         event.getJDA().updateCommands().addCommands(commandData).queue();
     }
 }
