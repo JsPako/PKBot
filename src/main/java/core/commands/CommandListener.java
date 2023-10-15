@@ -42,12 +42,12 @@ public class CommandListener extends ListenerAdapter {
                 OptionMapping amountOption = event.getOption("amount");
 
                 try {
-                    setBalance.user(event);
+                    setBalance.user(event , amountOption.getAsInt());
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
                 event.reply("You set <@" + (userOption != null ? userOption.getAsUser().getId() : null) + "> to "
-                            + (amountOption != null ? amountOption.getAsInt() : 0) + " pisscoins").queue();
+                            + (amountOption != null ? amountOption.getAsInt() : 0) + " pisscoins").setEphemeral(true).queue();
                 break;
             case "pay":
                 OptionMapping userPayOption = event.getOption("user");
@@ -63,6 +63,19 @@ public class CommandListener extends ListenerAdapter {
             case "coinflip":
                 coinFlip.gamble(event, user);
                 break;
+            case "resetbal":
+                int defamount = 500;
+                try
+                {
+                    setBalance.user(event, defamount);
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeException(e);
+                }
+                event.reply("Users balance has been reset").setEphemeral(true).queue();
+
+                break;
 
                 /* MISSING COMMANDS 
                  *
@@ -70,8 +83,8 @@ public class CommandListener extends ListenerAdapter {
                  *  
                  *  admin commands potentially
                  * 
-                 *  givemoney - gives money to user
-                 *  setmoney - sets users cash
+                 *  
+                 *  
                  *  resetmoney - reset users cash
                  * 
                  *  !!FUN!! commands potentially
@@ -97,6 +110,9 @@ public class CommandListener extends ListenerAdapter {
 
         // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
         List<CommandData> commandData = new ArrayList<>();
+
+        OptionData setOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person's balance you want to set", true);
+        commandData.add(Commands.slash("resetbal","Reset selected users balance down to 500").addOptions(setOption1).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)).setGuildOnly(true));
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
 
@@ -113,7 +129,7 @@ public class CommandListener extends ListenerAdapter {
         commandData.add(Commands.slash("coinflip","Enter in the amount you want to gamble for a chance to double or nothing").addOptions(coinOption1));
         OptionData setOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person's balance you want to set", true);
         OptionData setOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount you want to set the balance to", true).setMaxValue(1000000000).setMinValue(0);
-        commandData.add(Commands.slash("setbal","Enter in the amount you want to gamble for a chance to double or nothing").addOptions(setOption1, setOption2).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)).setGuildOnly(true));
+        commandData.add(Commands.slash("setbal","Set user balance").addOptions(setOption1, setOption2).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)).setGuildOnly(true));
         event.getJDA().updateCommands().addCommands(commandData).queue();
     }
 }

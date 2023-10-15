@@ -9,21 +9,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class setBalance {
-    public static void user(SlashCommandInteractionEvent EVENT) throws SQLException {
+    public static void user(SlashCommandInteractionEvent EVENT , Integer Amount) throws SQLException {
         // Collect the entered values from the slash command
         // userID is the target user that will get their balance set
         // amount is the amount that the balance will be set to
         OptionMapping userOption = EVENT.getOption("user");
-        OptionMapping amountOption = EVENT.getOption("amount");
         String userID = userOption != null ? userOption.getAsUser().getId() : null;
-        int amount = amountOption != null ? amountOption.getAsInt() : 0;
 
         // Make a connection to the database
         Connection con = getTable.openConnection();
 
         // Update the user's database row with the new balance values.
         String updateSQL = String.format("UPDATE Users SET balance = %d WHERE user_id = '%s'",
-                amount, userID);
+                Amount, userID);
         Statement stmt = con.createStatement();
         stmt.executeUpdate(updateSQL);
 

@@ -30,7 +30,7 @@ public class coinFlip {
 
         if(balance < gambleAmount)
         {
-            EVENT.reply("❌ Not enough balance to make this action.").queue();
+            EVENT.reply("Not enough balance to make this action.").queue();
         }
         else
         {
