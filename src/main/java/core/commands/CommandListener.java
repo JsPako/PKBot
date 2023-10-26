@@ -4,6 +4,7 @@ import core.commands.balance.getBalance;
 import core.commands.balance.pay;
 import core.commands.balance.setBalance;
 import core.commands.gamble.coinFlip;
+import core.commands.stats.statistics;
 import core.utility.insertUser;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -42,12 +43,13 @@ public class CommandListener extends ListenerAdapter {
                 OptionMapping amountOption = event.getOption("amount");
 
                 try {
+                    assert amountOption != null;
                     setBalance.user(event , amountOption.getAsInt());
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
                 event.reply("You set <@" + (userOption != null ? userOption.getAsUser().getId() : null) + "> to "
-                            + (amountOption != null ? amountOption.getAsInt() : 0) + " pisscoins").setEphemeral(true).queue();
+                            + amountOption.getAsInt() + " pisscoins").setEphemeral(true).queue();
                 break;
             case "pay":
                 OptionMapping userPayOption = event.getOption("user");
@@ -57,35 +59,36 @@ public class CommandListener extends ListenerAdapter {
                 event.reply("You paid <@" + (userPayOption != null ? userPayOption.getAsUser().getId() : null) + "> "
                             + (amountPayOption != null ? amountPayOption.getAsInt() : 0) + " pisscoins").queue();
                 break;
-            case "daily":
-                event.reply("Daily Redeemed!").queue();
+            case "highlow":
                 break;
             case "coinflip":
                 coinFlip.gamble(event, user);
                 break;
             case "resetbal":
-                int defamount = 500;
+                int defAmount = 500;
                 try
                 {
-                    setBalance.user(event, defamount);
+                    setBalance.user(event, defAmount);
                 }
                 catch (SQLException e)
                 {
                     throw new RuntimeException(e);
                 }
                 event.reply("Users balance has been reset").setEphemeral(true).queue();
-
                 break;
-
+            case "stats":
+                try {
+                    statistics.user(event, user);
+                    break;
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
                 /* MISSING COMMANDS 
                  *
                  *  Daily - gives user their daily amount of money
                  *  
                  *  admin commands potentially
-                 * 
-                 *  
-                 *  
-                 *  resetmoney - reset users cash
+                 *
                  * 
                  *  !!FUN!! commands potentially
                  * 
@@ -111,8 +114,8 @@ public class CommandListener extends ListenerAdapter {
         // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
         List<CommandData> commandData = new ArrayList<>();
 
-        OptionData setOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person's balance you want to set", true);
-        commandData.add(Commands.slash("resetbal","Reset selected users balance down to 500").addOptions(setOption1).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)).setGuildOnly(true));
+        commandData.add(Commands.slash("stats","Display your gambling statistics."));
+
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
 
@@ -130,6 +133,8 @@ public class CommandListener extends ListenerAdapter {
         OptionData setOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person's balance you want to set", true);
         OptionData setOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount you want to set the balance to", true).setMaxValue(1000000000).setMinValue(0);
         commandData.add(Commands.slash("setbal","Set user balance").addOptions(setOption1, setOption2).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)).setGuildOnly(true));
+        OptionData resetOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person's balance you want to set", true);
+        commandData.add(Commands.slash("resetbal","Reset selected users balance down to 500").addOptions(resetOption1).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)).setGuildOnly(true));
         event.getJDA().updateCommands().addCommands(commandData).queue();
     }
 }
