@@ -41,8 +41,8 @@ public class statistics {
         eb.setColor(new Color(0xF4C430));
         eb.addField("Your balance is: ", String.valueOf(Balance), false);
         eb.addField("You gained: ", String.valueOf(Gain), false);
-        eb.addField("You won in total: ", String.valueOf(Win), false);
-        eb.addField("You lost in total: ", String.valueOf(Loss), false);
+        eb.addField("You won in total: ", String.valueOf(Win), true);
+        eb.addField("You lost in total: ", String.valueOf(Loss), true);
 
         // Send the embed back to the user.
         EVENT.replyEmbeds(eb.build()).queue();
