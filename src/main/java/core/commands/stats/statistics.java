@@ -13,8 +13,10 @@ public class statistics {
     public static void user(SlashCommandInteractionEvent EVENT, String ID) throws SQLException {
         int Balance, Gain, Loss, Win;
 
+        // Open connection to the database
         Connection con = getTable.openConnection();
 
+        // Collect the result set matching the user's id
         ResultSet rs;
         try {
             rs = getTable.query(con, ID);
@@ -22,14 +24,18 @@ public class statistics {
             throw new RuntimeException(e);
         }
 
+        // Extract all the necessary values from the result set and save as local variables.
         assert rs != null;
         Balance = rs.getInt("balance");
         Gain = rs.getInt("net_gain");
         Loss = rs.getInt("total_loss");
         Win = rs.getInt("total_win");
 
+
+        // Close the connection to the database
         getTable.closeConnection(con);
 
+        // Build the embed with title, colour and 4 fields (lines) displaying the statistics
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Your Statistics", null);
         eb.setColor(new Color(0xF4C430));
@@ -38,6 +44,7 @@ public class statistics {
         eb.addField("You won in total: ", String.valueOf(Win), false);
         eb.addField("You lost in total: ", String.valueOf(Loss), false);
 
-        EVENT.getChannel().sendMessageEmbeds(eb.build()).queue();
+        // Send the embed back to the user.
+        EVENT.replyEmbeds(eb.build()).queue();
     }
 }
