@@ -83,20 +83,6 @@ public class CommandListener extends ListenerAdapter {
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
-                /* MISSING COMMANDS 
-                 *
-                 *  Daily - gives user their daily amount of money
-                 *  
-                 *  admin commands potentially
-                 *
-                 * 
-                 *  !!FUN!! commands potentially
-                 * 
-                 *  nuke - costs 90 percent of money in the entire server and restarts everyone back to default amount of cash
-                 *  resetall - resets everyones money to default
-                 * 
-                 */
-
         }
     }
 
@@ -114,7 +100,7 @@ public class CommandListener extends ListenerAdapter {
         // MAX 100 COMMANDS - GUILD ONLY AVAILABLE INSTANTLY USE FOR TESTING ONLY
         List<CommandData> commandData = new ArrayList<>();
 
-        commandData.add(Commands.slash("stats","Display your gambling statistics."));
+
 
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
@@ -125,6 +111,7 @@ public class CommandListener extends ListenerAdapter {
         List<CommandData> commandData = new ArrayList<>();
         commandData.add(Commands.slash("ping","Check if the bot is responsive."));
         commandData.add(Commands.slash("bal","Displays your balance."));
+        commandData.add(Commands.slash("stats","Display your gambling statistics."));
         OptionData payOption1 = new OptionData(OptionType.USER, "user", "Enter the username of the person you want to pay", true);
         OptionData payOption2 = new OptionData(OptionType.INTEGER, "amount", "Enter the amount to transfer.", true).setMaxValue(1000000000).setMinValue(1);
         commandData.add(Commands.slash("pay", "Pay an amount of money to a user.").addOptions(payOption1,payOption2).setGuildOnly(true));
